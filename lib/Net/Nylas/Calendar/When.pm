@@ -2,7 +2,7 @@ package Net::Nylas::Calendar::When;
 
 use Moose;
 with 'Net::Nylas::Calendar::ToJson';
-use Kavorka qw( method multi );
+use Kavorka;
 use DateTime;
 use DateTime::Format::ISO8601;
 
@@ -11,6 +11,10 @@ has $_, is => 'rw', clearer => "clear_$_"
             date start_date end_date );
 
 method get () {
+    die "When has no time fields set"
+        unless defined($self->date)     || defined($self->start_date)
+            || defined($self->start_time) || defined($self->time);
+
     if (defined $self->date) {
         my $dt = DateTime::Format::ISO8601->parse_datetime($self->date);
         return ($dt, $dt->clone, 1);
