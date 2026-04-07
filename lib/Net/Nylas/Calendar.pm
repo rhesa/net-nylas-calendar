@@ -65,9 +65,8 @@ method create_event ($event) {
 
 method update_event ($event) {
     die "No calendar selected" unless $self->_current_calendar;
-    $event->{-id}          = $event->{id};
-    $event->{-calendar_id} = $self->_current_calendar;
-    my $res = $self->_service->put('/events/[% id %]?calendar_id=[% calendar_id %]', $event);
+    my $params = { %$event, -id => $event->{id}, -calendar_id => $self->_current_calendar };
+    my $res = $self->_service->put('/events/[% id %]?calendar_id=[% calendar_id %]', $params);
     die $res->error unless $res->success;
     to_Event($res->res->{data});
 }
@@ -79,5 +78,7 @@ method delete_event ($id) {
     die $res->error unless $res->success || $res->code == 404;
     1;
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;

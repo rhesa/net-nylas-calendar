@@ -69,4 +69,6 @@ method set (DateTime $start, DateTime $end, $is_all_day) {
     }
 }
 
+__PACKAGE__->meta->make_immutable;
+
 1;

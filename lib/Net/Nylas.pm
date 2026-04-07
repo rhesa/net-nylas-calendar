@@ -36,4 +36,6 @@ method _build_authentication {
     return sub { $_[1]->header(Authorization => "Bearer $token") };
 }
 
+__PACKAGE__->meta->make_immutable;
+
 1;

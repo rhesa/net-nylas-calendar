@@ -16,7 +16,7 @@ class_type When,          { class => 'Net::Nylas::Calendar::When'      };
 class_type Participant,   { class => 'Net::Nylas::Calendar::Participant' };
 class_type Organizer,     { class => 'Net::Nylas::Calendar::Organizer' };
 
-declare CBool, as Bool, where { !!$_ || !$_ };
+declare CBool, as Bool;
 declare CalendarId, as Str, where { 1 };
 
 coerce CBool,
@@ -37,5 +37,11 @@ coerce Participant,
     from HashRef, via { 'Net::Nylas::Calendar::Participant'->new($_) };
 coerce Organizer,
     from HashRef, via { 'Net::Nylas::Calendar::Organizer'->new($_) };
+
+require Net::Nylas::Calendar::Calendar;
+require Net::Nylas::Calendar::Event;
+require Net::Nylas::Calendar::When;
+require Net::Nylas::Calendar::Participant;
+require Net::Nylas::Calendar::Organizer;
 
 1;

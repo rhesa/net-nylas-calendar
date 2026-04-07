@@ -12,7 +12,8 @@ use Net::Nylas::Calendar::Organizer;
 has [ qw( id grant_id calendar_id ical_uid html_link object ) ], is => 'ro';
 has [ qw( created_at updated_at ) ], is => 'ro', isa => Int;
 
-has [ qw( title description location recurrence ) ], is => 'rw';
+has [ qw( title description location ) ], is => 'rw';
+has recurrence => is => 'rw', isa => ArrayRef[Str];
 has reminders  => is => 'rw', isa => HashRef;
 has metadata   => is => 'rw', isa => HashRef;
 
@@ -69,5 +70,7 @@ has visibility => is => 'rw', isa => Enum[qw( public private )];
 }
 
 =cut
+
+__PACKAGE__->meta->make_immutable;
 
 1;
