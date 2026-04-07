@@ -9,7 +9,7 @@ Net::Nylas::Calendar - Access Nylas Calendars using the v3 API
 use Moose;
 extends 'Net::Nylas';
 use Kavorka;
-use Types::Standard qw( ArrayRef );
+use Types::Standard;
 use Net::Nylas::Calendar::Types qw( NylasCalendar CalendarId Event to_Event to_NylasCalendar );
 use Net::Nylas::Calendar::Calendar;
 use Net::Nylas::Calendar::Event;
@@ -37,7 +37,7 @@ method get_events (%filters) {
     my @items;
     my $cursor;
     do {
-        my $params = { calendar_id => $self->_current_calendar, %filters };
+        my $params = { %filters, calendar_id => $self->_current_calendar };
         $params->{page_token} = $cursor if $cursor;
         my $res = $self->_service->get('/events', $params);
         die $res->error unless $res->success;
@@ -57,15 +57,15 @@ method get_event ($id) {
 
 method create_event ($event) {
     die "No calendar selected" unless $self->_current_calendar;
-    $event->{-calendar_id} = $self->_current_calendar;
-    my $res = $self->_service->post('/events?calendar_id=[% calendar_id %]', $event);
+    my $params = { %$event, -calendar_id => $self->_current_calendar };
+    my $res = $self->_service->post('/events?calendar_id=[% calendar_id %]', $params);
     die $res->error unless $res->success;
     to_Event($res->res->{data});
 }
 
 method update_event ($event) {
     die "No calendar selected" unless $self->_current_calendar;
-    $event->{-id}          = $event->id;
+    $event->{-id}          = $event->{id};
     $event->{-calendar_id} = $self->_current_calendar;
     my $res = $self->_service->put('/events/[% id %]?calendar_id=[% calendar_id %]', $event);
     die $res->error unless $res->success;
@@ -76,7 +76,7 @@ method delete_event ($id) {
     die "No calendar selected" unless $self->_current_calendar;
     my $res = $self->_service->delete('/events/[% id %]?calendar_id=[% calendar_id %]',
         { -id => $id, -calendar_id => $self->_current_calendar });
-    die $res->error unless $res->success || $res->code eq '404';
+    die $res->error unless $res->success || $res->code == 404;
     1;
 }
 
