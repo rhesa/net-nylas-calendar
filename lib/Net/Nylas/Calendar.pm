@@ -34,17 +34,25 @@ method get_calendar ($id) {
 
 method get_events (%filters) {
     die "No calendar selected" unless $self->_current_calendar;
-    my @items;
-    my $cursor;
-    do {
-        my $params = { %filters, calendar_id => $self->_current_calendar };
-        $params->{page_token} = $cursor if $cursor;
-        my $res = $self->_service->get('/events', $params);
-        die $res->error unless $res->success;
-        push @items, @{ $res->res->{data} };
-        $cursor = $res->res->{next_cursor};
-    } while ($cursor);
-    map { to_Event($_) } @items;
+    my $params = { %filters, calendar_id => $self->_current_calendar };
+    my $res = $self->_service->get('/events', $params);
+    die $res->error unless $res->success;
+    my @items = @{ $res->res->{data} };
+    if (wantarray) {
+        my $cursor = $res->res->{next_cursor};
+        while ($cursor) {
+            $params = { %filters, calendar_id => $self->_current_calendar, page_token => $cursor };
+            $res = $self->_service->get('/events', $params);
+            die $res->error unless $res->success;
+            push @items, @{ $res->res->{data} };
+            $cursor = $res->res->{next_cursor};
+        }
+        return map { to_Event($_) } @items;
+    }
+    return {
+        events      => [ map { to_Event($_) } @items ],
+        next_cursor => $res->res->{next_cursor},
+    };
 }
 
 method get_event ($id) {
